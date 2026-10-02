@@ -23,7 +23,7 @@ bash build-app.sh
 open dist/NoLidSensor.app
 ```
 
-Open the moon menu, enable monitoring and allow camera access. Use the camera test to adjust the darkness threshold. Monitoring starts **off** on every launch.
+Open the moon menu, enable monitoring and allow camera access. The camera test can request access independently, without enabling monitoring. Use it to adjust the darkness threshold. Monitoring starts **off** on every launch.
 
 The app builds for your Mac’s architecture with an ad hoc signature. It is not notarized.
 

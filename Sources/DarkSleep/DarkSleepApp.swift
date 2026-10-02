@@ -31,7 +31,13 @@ final class Model: ObservableObject {
     var showPrompt: (() -> Void)?
     var closePrompt: (() -> Void)?
 
-    init() {
+    private let authorizationStatus: () -> AVAuthorizationStatus
+    private let requestAccess: (@escaping (Bool) -> Void) -> Void
+
+    init(authorizationStatus: @escaping () -> AVAuthorizationStatus = { AVCaptureDevice.authorizationStatus(for: .video) },
+         requestAccess: @escaping (@escaping (Bool) -> Void) -> Void = { AVCaptureDevice.requestAccess(for: .video, completionHandler: $0) }) {
+        self.authorizationStatus = authorizationStatus
+        self.requestAccess = requestAccess
         func number(_ key: String, _ fallback: Double, _ range: ClosedRange<Double>) -> Double {
             guard let n = UserDefaults.standard.object(forKey: key) as? Double, n.isFinite else { return fallback }
             return min(range.upperBound, max(range.lowerBound, n))
@@ -61,16 +67,35 @@ final class Model: ObservableObject {
     func setEnabled(_ value: Bool) {
         enabled = value; reset()
         guard value else { status = L("Off"); return }
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized: status = L("Waiting for inactivity")
+        withCameraAccess { [weak self] granted in
+            guard let self else { return }
+            self.enabled = granted
+            self.status = granted ? L("Waiting for inactivity") : L("Camera access denied. Allow it in macOS Settings.")
+            self.scheduleNextEvent()
+        }
+    }
+    private func withCameraAccess(_ completion: @escaping (Bool) -> Void) {
+        switch authorizationStatus() {
+        case .authorized: completion(true)
         case .notDetermined:
+            checking = true
+            scheduleNextEvent()
             status = L("Camera permission required")
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in DispatchQueue.main.async {
-                guard let self, self.enabled else { return }
-                if granted { self.status = L("Waiting for inactivity"); self.scheduleNextEvent() }
-                else { self.enabled = false; self.scheduleNextEvent(); self.status = L("Camera access denied. Allow it in macOS Settings.") }
-            } }
-        default: enabled = false; scheduleNextEvent(); status = L("Camera access denied. Allow it in macOS Settings.")
+            let token = generation
+            requestAccess { [weak self] granted in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    guard self.generation == token else {
+                        // Settings may have changed while the system permission dialog was open.
+                        self.scheduleNextEvent()
+                        return
+                    }
+                    self.checking = false
+                    completion(granted)
+                    self.scheduleNextEvent()
+                }
+            }
+        default: completion(false)
         }
     }
     func reset() {
@@ -88,12 +113,15 @@ final class Model: ObservableObject {
     func skip() { reset(); status = L("Sleep skipped until the next check") }
     func testCamera() {
         guard !checking, !promptVisible, Date() >= snoozedUntil, !suspended else { return }
-        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { status = L("Enable monitoring and allow camera access first"); return }
-        probe(testOnly: true)
+        withCameraAccess { [weak self] granted in
+            guard let self else { return }
+            guard granted else { self.status = L("Camera access denied. Allow it in macOS Settings."); return }
+            self.probe(testOnly: true)
+        }
     }
     private func scheduleNextEvent() {
         timer?.invalidate(); timer = nil
-        guard let delay = EventSchedule.delay(enabled: enabled && AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
+        guard let delay = EventSchedule.delay(enabled: enabled && authorizationStatus() == .authorized,
             suspended: suspended, checking: checking, prompt: promptVisible,
             snoozeRemaining: snoozedUntil.timeIntervalSinceNow, checkRemaining: nextCheck.timeIntervalSinceNow) else { return }
         let next = Timer(timeInterval: delay, repeats: false) { [weak self] _ in self?.tick() }
