@@ -1,4 +1,4 @@
-# NoLidSensor
+# 🌙 NoLidSensor
 
 A macOS menu bar app for MacBooks that no longer sleep when the lid closes because of a broken lid sensor. It uses the built-in camera to check for darkness after a period without keyboard or mouse input.
 
