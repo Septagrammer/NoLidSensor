@@ -5,6 +5,7 @@ swift build -c release
 APP="$PWD/dist/NoLidSensor.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
+cp LICENSE NOTICE "$APP/Contents/Resources/"
 cp .build/release/NoLidSensor "$APP/Contents/MacOS/NoLidSensor"
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

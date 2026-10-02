@@ -36,3 +36,7 @@ The app builds for your Mac’s architecture with an ad hoc signature. It is not
 - Camera, sleep and wake behavior still need verification on your Mac.
 
 Run policy tests with `swift test`.
+
+## License
+
+[PolyForm Noncommercial 1.0.0](LICENSE). Use, modification and redistribution are permitted for noncommercial purposes under its terms. Commercial use requires separate permission.
