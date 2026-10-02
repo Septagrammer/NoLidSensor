@@ -6,7 +6,7 @@
 
 A small macOS menu bar app that checks for **darkness + inactivity**, then offers to put your Mac to sleep.
 
-**macOS 13+ · Swift · English / Русский / Čeština**
+**macOS 13+ · Swift · English / Українська / Русский / Čeština**
 
 </div>
 
@@ -38,7 +38,7 @@ Everything lives under the moon icon in the menu bar:
 | Do not disturb | Pause for an hour, or resume early |
 | Test camera | Measure brightness without putting the Mac to sleep |
 
-Monitoring starts **off** each time you launch the app. A saved pause survives a restart. The interface follows your system language, with English, Russian and Czech translations.
+Monitoring starts **off** each time you launch the app. A saved pause survives a restart. The interface follows your system language, with English, Ukrainian, Russian and Czech translations.
 
 ## Build and run
 
