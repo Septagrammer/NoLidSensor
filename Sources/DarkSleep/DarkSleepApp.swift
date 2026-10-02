@@ -198,10 +198,31 @@ final class Model: ObservableObject {
     }
 }
 
+struct MenuAction: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon).frame(width: 18).foregroundStyle(.secondary)
+                Text(title).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(.vertical, 5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+    }
+}
+
 struct SnoozeButton: View {
     @ObservedObject var model: Model
     var body: some View {
-        Button(model.snoozedUntil > Date() ? L("Resume") : L("Do not disturb for an hour")) {
+        MenuAction(title: model.snoozedUntil > Date() ? L("Resume") : L("Do not disturb for an hour"),
+                   icon: model.snoozedUntil > Date() ? "play" : "moon.zzz") {
             if Date() < model.snoozedUntil { model.resume() } else { model.snooze() }
         }
     }
@@ -238,12 +259,33 @@ struct MenuView: View {
             Text(L("Sleep requires darkness and no keyboard or mouse activity between two checks.")).font(.caption).foregroundStyle(.secondary)
             Text(L("Sleep after 60 seconds without a response")).font(.caption).foregroundStyle(.secondary)
             Divider()
-            SnoozeButton(model: model)
-            Button(L("Measure light without sleeping"), action: model.testCamera)
-            Text(model.brightness).monospacedDigit().font(.caption)
-            Text(model.status).font(.caption).fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 6) {
+                SnoozeButton(model: model)
+                MenuAction(title: L("Test camera"), icon: "camera", action: model.testCamera)
+                    .help(L("Measure light without sleeping"))
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(L("Brightness")).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(model.brightness).monospacedDigit()
+                }
+                Divider()
+                Text(L("Status")).foregroundStyle(.secondary)
+                Text(model.status).fixedSize(horizontal: false, vertical: true)
+            }
+            .font(.caption)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
             Divider()
-            Button(L("Quit")) { NSApp.terminate(nil) }
+            HStack {
+                Spacer()
+                Button(L("Quit")) { NSApp.terminate(nil) }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 4)
+            }
         }.padding(16).frame(width: 320)
     }
 }

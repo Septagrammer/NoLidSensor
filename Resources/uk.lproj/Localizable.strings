@@ -47,3 +47,6 @@
 "Activity between checks. Waiting for a quiet interval." = "Між перевірками була активність. Очікування проміжку без введення.";
 "Sleep requires darkness and no keyboard or mouse activity between two checks." = "Для сну потрібні темрява та відсутність активності клавіатури й миші між двома перевірками.";
 "Darkness threshold" = "Поріг темряви";
+"Test camera" = "Перевірити камеру";
+"Brightness" = "Яскравість";
+"Status" = "Стан";
