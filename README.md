@@ -32,8 +32,6 @@ The app builds for your Mac’s architecture with an ad hoc signature. It is not
 - A dark room or covered camera can look like a closed lid.
 - Videos, downloads and other background work do not count as keyboard or mouse activity. Pause monitoring when needed.
 - Only the built-in camera is supported. Camera errors do not trigger sleep.
-- This does not repair the sensor or restore waking when the lid opens.
-- Camera, sleep and wake behavior still need verification on your Mac.
 
 Run policy tests with `swift test`.
 
